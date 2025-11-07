@@ -1,3 +1,8 @@
+''' Executing this function initiates the application of emotion 
+    detection to be executed over the Flask channel and deployed on
+    localhost:5000.
+'''
+
 from flask import Flask, render_template, request
 from EmotionDetection.emotion_detection import emotion_detector
 
@@ -5,19 +10,29 @@ app = Flask(__name__)
 
 @app.route("/emotionDetector")
 def em_detector():
+    ''' This code receives the text from the HTML interface and 
+        runs emotion detection over it using emotion_detector()
+        function. The output returned shows score for each emotion.
+    '''
     text_to_analyze = request.args.get("textToAnalyze")
 
     emotion = emotion_detector(text_to_analyze)
 
-    return f"For the given statement, the system response is 'anger': {emotion['anger']}, " + \
-        f"'disgust': {emotion['disgust']}, 'fear': {emotion['fear']}, 'joy': {emotion['joy']} and 'sadness': {emotion['sadness']}." + \
+    if emotion['dominant_emotion'] is None:
+        return "Invalid text! Please try again!"
+
+    return "For the given statement, the system response is 'anger': " + \
+        f"{emotion['anger']}, 'disgust': {emotion['disgust']}, 'fear': " + \
+        f"{emotion['fear']}, 'joy': {emotion['joy']} and 'sadness': " + \
+        f"{emotion['sadness']}." + \
         f"The dominant emotion is {emotion['dominant_emotion']}."
 
 @app.route("/")
 def index():
-    return render_template('index.html')
-    
-if __name__ == "__main__":
-    ''' This functions executes the flask app and deploys it on localhost:5000
+    ''' This function initiates the rendering of the main application
+        page over the Flask channel
     '''
-    app.run(host = "0.0.0.0", port = 5000)
+    return render_template('index.html')
+
+
+app.run(host = "0.0.0.0", port = 5000)
